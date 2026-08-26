@@ -1,0 +1,34 @@
+{
+  "name": "kora-protocol",
+  "version": "0.1.0",
+  "description": "Modular, risk-aware decentralized lending infrastructure",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:unit": "hardhat test test/unit/*.test.ts",
+    "test:integration": "hardhat test test/integration/*.test.ts",
+    "test:invariants": "hardhat test test/invariants/*.test.ts",
+    "coverage": "hardhat coverage",
+    "clean": "hardhat clean"
+  },
+  "keywords": [
+    "defi",
+    "lending",
+    "borrowing",
+    "solidity",
+    "ethereum"
+  ],
+  "author": "Kora Protocol",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^26.2.0",
+    "hardhat": "^2.22.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}
