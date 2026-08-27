@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Navbar } from "../components/Navbar";
+import { KoraHero } from "../components/landing/KoraHero";
 import { MetricsOverview } from "../components/MetricsOverview";
 import { MarketsTable } from "../components/MarketsTable";
 import { HealthFactorGauge } from "../components/HealthFactorGauge";
@@ -15,13 +16,13 @@ import {
 } from "../lib/mockData";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"markets" | "terminal" | "radar">("markets");
+  const [activeTab, setActiveTab] = useState<"landing" | "markets" | "terminal" | "radar">("landing");
   const [reserves, setReserves] = useState<MarketReserve[]>(INITIAL_RESERVES);
   const [selectedReserve, setSelectedReserve] = useState<MarketReserve>(INITIAL_RESERVES[0]);
   const [radarPositions, setRadarPositions] = useState<VulnerablePosition[]>(INITIAL_RADAR_POSITIONS);
 
   const [walletConnected, setWalletConnected] = useState<boolean>(true);
-  const userAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"; // Hardhat Deployer / User Account
+  const userAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
   // Calculate real-time user portfolio metrics
   const totalCollateralUSD = reserves.reduce((acc, r) => {
@@ -41,10 +42,8 @@ export default function Home() {
   }, 0);
 
   const borrowPowerUSD = Math.max(0, weightedLTVUSD - totalDebtUSD);
-
   const healthFactor = totalDebtUSD === 0 ? 999 : weightedThresholdUSD / totalDebtUSD;
 
-  // Handler for user transactions (Supply, Withdraw, Borrow, Repay)
   const handleExecuteAction = (
     action: "supply" | "withdraw" | "borrow" | "repay",
     symbol: string,
@@ -95,13 +94,11 @@ export default function Home() {
     );
   };
 
-  // Quick Action selection from Markets Table
-  const handleSelectFromTable = (reserve: MarketReserve, action: "supply" | "borrow") => {
+  const handleSelectFromTable = (reserve: MarketReserve) => {
     setSelectedReserve(reserve);
     setActiveTab("terminal");
   };
 
-  // Handler for executing a liquidation from the radar
   const handleLiquidateRadarPosition = (pos: VulnerablePosition) => {
     setRadarPositions((prev) => prev.filter((p) => p.userAddress !== pos.userAddress));
   };
@@ -109,20 +106,24 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-slate-100 font-sans">
       <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        activeTab={activeTab === "landing" ? "markets" : activeTab}
+        setActiveTab={(tab) => setActiveTab(tab)}
         walletConnected={walletConnected}
         connectWallet={() => setWalletConnected(!walletConnected)}
         userAddress={userAddress}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Global Protocol Metrics */}
-        <MetricsOverview reserves={reserves} />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+        {/* FE-A2: Flagship Interactive 3D Landing Hero */}
+        <KoraHero
+          onLaunchApp={() => setActiveTab("terminal")}
+          onExploreProtocol={() => setActiveTab("markets")}
+        />
 
-        {/* Tab 1: Markets Overview */}
+        {/* Dynamic Navigation Sections for Testing Full Flow */}
         {activeTab === "markets" && (
-          <div className="space-y-8">
+          <div className="space-y-8 pt-8 border-t border-border">
+            <MetricsOverview reserves={reserves} />
             <HealthFactorGauge
               healthFactor={healthFactor}
               totalCollateralUSD={totalCollateralUSD}
@@ -133,9 +134,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab 2: Position Terminal */}
         {activeTab === "terminal" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 border-t border-border">
             <div className="lg:col-span-5 space-y-6">
               <HealthFactorGauge
                 healthFactor={healthFactor}
@@ -152,7 +152,9 @@ export default function Home() {
                       <div key={r.symbol} className="py-2.5 flex justify-between items-center">
                         <div>
                           <span className="font-bold text-white">{r.symbol}</span>
-                          <span className="text-muted ml-2">{r.userSupplied} {r.symbol}</span>
+                          <span className="text-muted ml-2">
+                            {r.userSupplied} {r.symbol}
+                          </span>
                         </div>
                         <span className="text-emerald-400 font-bold">
                           ${(r.userSupplied * r.priceUSD).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -175,9 +177,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab 3: Liquidation Radar */}
         {activeTab === "radar" && (
-          <div className="space-y-8">
+          <div className="space-y-8 pt-8 border-t border-border">
             <LiquidationRadar
               positions={radarPositions}
               onLiquidate={handleLiquidateRadarPosition}
