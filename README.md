@@ -287,22 +287,6 @@ npm run dev
 npm run build
 ```
 
----
-
-## 11. Roadmap
-
-- [x] **Milestone A1 — Architecture & Foundation**: Rounding matrix, Wad/Ray lifecycle, invariant design.
-- [x] **Milestone A2 — Core Lending Pool**: `KoraMath`, `KoraReserveManager`, supply and withdraw mechanics.
-- [x] **Milestone A3 — Borrowing & Interest**: `KoraInterestRateModel`, two-kink curve, debt index compounding.
-- [x] **Milestone A4 — Oracle & Risk Engine**: `KoraOracleManager`, `KoraRiskEngine`, multi-tier staleness guards.
-- [x] **Milestone A5 — Liquidation Engine**: `KoraLiquidationEngine`, dynamic close factors (50%/100%), bonus seizure.
-- [x] **Milestone A6 — Blockchain Integration**: Local deployment scripts, initial reserve initialization.
-- [x] **Milestone A7 — Backend Analytics**: Laravel modular service layer, event indexer, risk scanner.
-- [x] **Milestone A8 — Frontend Terminal**: Next.js institutional terminal, real-time Health Factor gauge.
-- [x] **Milestone FE-A2 — Interactive 3D Landing Hero**: Three.js/R3F infrastructure visualization, semantic hover bridge.
-- [ ] **Milestone FE-A3 — Scroll-Driven Protocol Storytelling**: Camera transitions & timeline progression.
-
----
 
 ## 12. License
 
