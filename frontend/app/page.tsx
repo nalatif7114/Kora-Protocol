@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Navbar } from "../components/Navbar";
-import { KoraHero } from "../components/landing/KoraHero";
+import { KoraLandingPage } from "../components/landing/KoraLandingPage";
 import { MetricsOverview } from "../components/MetricsOverview";
 import { MarketsTable } from "../components/MarketsTable";
 import { HealthFactorGauge } from "../components/HealthFactorGauge";
@@ -106,23 +106,25 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-slate-100 font-sans">
       <Navbar
-        activeTab={activeTab === "landing" ? "markets" : activeTab}
+        activeTab={activeTab}
         setActiveTab={(tab) => setActiveTab(tab)}
         walletConnected={walletConnected}
         connectWallet={() => setWalletConnected(!walletConnected)}
         userAddress={userAddress}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
-        {/* FE-A2: Flagship Interactive 3D Landing Hero */}
-        <KoraHero
-          onLaunchApp={() => setActiveTab("terminal")}
-          onExploreProtocol={() => setActiveTab("markets")}
-        />
+      <main className="flex-1 w-full mx-auto">
+        {/* FE-A3: Cinematic Scroll-Driven 3D Storytelling Experience */}
+        {activeTab === "landing" && (
+          <KoraLandingPage
+            onLaunchApp={() => setActiveTab("terminal")}
+            onExploreProtocol={() => setActiveTab("markets")}
+          />
+        )}
 
-        {/* Dynamic Navigation Sections for Testing Full Flow */}
+        {/* Dynamic Navigation Sections for Protocol Exploration */}
         {activeTab === "markets" && (
-          <div className="space-y-8 pt-8 border-t border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
             <MetricsOverview reserves={reserves} />
             <HealthFactorGauge
               healthFactor={healthFactor}
@@ -135,7 +137,7 @@ export default function Home() {
         )}
 
         {activeTab === "terminal" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 border-t border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-5 space-y-6">
               <HealthFactorGauge
                 healthFactor={healthFactor}
@@ -178,7 +180,7 @@ export default function Home() {
         )}
 
         {activeTab === "radar" && (
-          <div className="space-y-8 pt-8 border-t border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
             <LiquidationRadar
               positions={radarPositions}
               onLiquidate={handleLiquidateRadarPosition}

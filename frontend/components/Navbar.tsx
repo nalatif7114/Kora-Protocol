@@ -4,8 +4,8 @@ import React from "react";
 import { ShieldCheck, Activity, Terminal, RefreshCw, Wallet } from "lucide-react";
 
 interface NavbarProps {
-  activeTab: "markets" | "terminal" | "radar";
-  setActiveTab: (tab: "markets" | "terminal" | "radar") => void;
+  activeTab: "landing" | "markets" | "terminal" | "radar";
+  setActiveTab: (tab: "landing" | "markets" | "terminal" | "radar") => void;
   walletConnected: boolean;
   connectWallet: () => void;
   userAddress: string;
@@ -22,13 +22,22 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand & Tagline */}
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-mono font-bold text-lg">
+        <div
+          onClick={() => setActiveTab("landing")}
+          className="flex items-center space-x-3 cursor-pointer group select-none"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") setActiveTab("landing");
+          }}
+          title="Return to Protocol Narrative"
+        >
+          <div className="w-9 h-9 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-mono font-bold text-lg group-hover:border-accent/60 transition-colors">
             K
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg tracking-tight text-white">KORA</span>
+              <span className="font-bold text-lg tracking-tight text-white group-hover:text-accent transition-colors">KORA</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
                 v1.0 MAINNET
               </span>

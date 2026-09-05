@@ -8,18 +8,20 @@ import { ProtocolConcept } from "../../landing/types";
 
 interface CapitalFlowProps {
   activeConcept: ProtocolConcept;
+  storyProgress?: number;
   reducedMotion?: boolean;
 }
 
 interface FlowTrajectory {
   id: string;
   curve: THREE.QuadraticBezierCurve3;
-  type: "supply" | "collateral" | "borrow" | "risk";
+  type: "supply" | "collateral" | "borrow";
   particleCount: number;
 }
 
 export const CapitalFlow: React.FC<CapitalFlowProps> = ({
   activeConcept,
+  storyProgress = 0,
   reducedMotion = false,
 }) => {
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
@@ -39,7 +41,7 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
           new THREE.Vector3(0, 0, 0)
         ),
         type: "supply",
-        particleCount: 6,
+        particleCount: 5,
       },
       {
         id: "supply-weth",
@@ -49,7 +51,7 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
           new THREE.Vector3(0, 0, 0)
         ),
         type: "supply",
-        particleCount: 6,
+        particleCount: 5,
       },
       {
         id: "supply-wbtc",
@@ -59,7 +61,7 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
           new THREE.Vector3(0, 0, 0)
         ),
         type: "supply",
-        particleCount: 6,
+        particleCount: 5,
       },
       // Collateral Path (Core -> Collateral Node)
       {
@@ -70,7 +72,7 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
           new THREE.Vector3(2.9, 1.4, 0.2)
         ),
         type: "collateral",
-        particleCount: 6,
+        particleCount: 5,
       },
       // Borrow Outflow (Core -> Borrow Hub)
       {
@@ -81,7 +83,7 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
           new THREE.Vector3(2.9, -1.3, 0.4)
         ),
         type: "borrow",
-        particleCount: 6,
+        particleCount: 5,
       },
     ];
   }, []);
@@ -99,37 +101,36 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
     });
   }, [trajectories]);
 
-  // 3. Frame loop animating InstancedMesh particles along bezier curves
+  // 3. Frame loop animating InstancedMesh particles
   useFrame((state) => {
     if (!instancedMeshRef.current) return;
 
-    const time = reducedMotion ? 0.5 : state.clock.getElapsedTime();
+    const elapsedTime = state.clock.getElapsedTime();
     let instanceIndex = 0;
 
     for (const traj of trajectories) {
       const isSupply = traj.type === "supply";
       const isBorrow = traj.type === "borrow";
+      const isCollateral = traj.type === "collateral";
 
-      // Dynamic speed based on hover state
-      const speedMultiplier =
+      // Focused speed: calm idle trickle unless specifically active
+      const isFocused =
         (isSupply && activeConcept === "liquidity") ||
-        (isBorrow && activeConcept === "borrow")
-          ? 1.6
-          : 0.8;
+        (isBorrow && activeConcept === "borrow") ||
+        (isCollateral && activeConcept === "collateral") ||
+        activeConcept === "interest";
 
-      const particleScale =
-        (isSupply && activeConcept === "liquidity") ||
-        (isBorrow && activeConcept === "borrow")
-          ? 0.075
-          : 0.05;
+      const speedMultiplier = isFocused ? 0.9 : 0.15; // 0.15 is calm trickle, 0.9 is active purposeful transit
+      const particleScale = isFocused ? 0.07 : 0.038;
 
       tempScale.set(particleScale, particleScale, particleScale);
 
       for (let i = 0; i < traj.particleCount; i++) {
         const offset = i / traj.particleCount;
+        // In reduced motion, particles stay frozen at clean intervals
         const progress = reducedMotion
           ? offset
-          : (time * 0.3 * speedMultiplier + offset) % 1.0;
+          : (elapsedTime * 0.25 * speedMultiplier + offset + storyProgress * 0.2) % 1.0;
 
         traj.curve.getPoint(progress, tempPos);
 
@@ -151,7 +152,8 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
         const isHighlight =
           (line.type === "supply" && activeConcept === "liquidity") ||
           (line.type === "borrow" && activeConcept === "borrow") ||
-          (line.type === "collateral" && (activeConcept === "collateral" || activeConcept === "risk"));
+          (line.type === "collateral" && activeConcept === "collateral") ||
+          activeConcept === "interest";
 
         const lineColor =
           line.type === "supply"
@@ -165,9 +167,9 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
             key={line.id}
             points={line.points}
             color={lineColor}
-            lineWidth={isHighlight ? 1.5 : 1.0}
+            lineWidth={isHighlight ? 1.5 : 0.8}
             transparent
-            opacity={isHighlight ? 0.9 : 0.35}
+            opacity={isHighlight ? 0.85 : 0.25}
           />
         );
       })}
@@ -184,6 +186,8 @@ export const CapitalFlow: React.FC<CapitalFlowProps> = ({
               ? "#10b981"
               : activeConcept === "borrow"
               ? "#38bdf8"
+              : activeConcept === "collateral"
+              ? "#06b6d4"
               : "#0ea5e9"
           }
         />

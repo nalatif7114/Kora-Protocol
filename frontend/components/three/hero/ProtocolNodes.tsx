@@ -10,6 +10,7 @@ interface ProtocolNodesProps {
   activeConcept: ProtocolConcept;
   hoveredNodeId: string | null;
   onHoverNode: (nodeId: string | null) => void;
+  storyProgress?: number;
   reducedMotion?: boolean;
 }
 
@@ -34,7 +35,7 @@ export const NODES_DATA: NodeTelemetry[] = [
     rate: "3.85% APY",
     utilization: "61.9%",
     ltv: "75% Max LTV",
-    status: "COLLATERAL TIER 1",
+    status: "TIER 1 COLLATERAL",
     position: [-3.1, 1.3, -0.2],
   },
   {
@@ -46,13 +47,13 @@ export const NODES_DATA: NodeTelemetry[] = [
     rate: "2.95% APY",
     utilization: "55.2%",
     ltv: "70% Max LTV",
-    status: "COLLATERAL TIER 1",
+    status: "TIER 1 COLLATERAL",
     position: [-3.3, 0.1, 0.6],
   },
   {
     id: "collateral",
     name: "Collateral Matrix",
-    symbol: "LTV/LT",
+    symbol: "COLLATERAL",
     type: "collateral",
     valueUSD: "$35.6M",
     rate: "80.0% LT",
@@ -77,6 +78,7 @@ export const ProtocolNodes: React.FC<ProtocolNodesProps> = ({
   activeConcept,
   hoveredNodeId,
   onHoverNode,
+  storyProgress = 0,
   reducedMotion = false,
 }) => {
   return (
@@ -108,7 +110,7 @@ const SingleNode: React.FC<{
 
   const isConceptActive =
     (node.type === "asset" && activeConcept === "liquidity") ||
-    (node.type === "collateral" && (activeConcept === "collateral" || activeConcept === "risk")) ||
+    (node.type === "collateral" && activeConcept === "collateral") ||
     (node.type === "borrow" && activeConcept === "borrow") ||
     isHovered ||
     internalHover;
@@ -116,19 +118,11 @@ const SingleNode: React.FC<{
   useFrame((state, delta) => {
     if (reducedMotion) return;
 
-    const time = state.clock.getElapsedTime();
-
-    if (groupRef.current) {
-      // Subtle hovering bobbing
-      const offset = Math.sin(time * 1.5 + node.position[0] * 2) * 0.04;
-      groupRef.current.position.y = node.position[1] + offset;
-    }
-
     if (coreMeshRef.current) {
-      const targetScale = isConceptActive ? 1.25 : 1.0;
+      const targetScale = isConceptActive ? 1.2 : 1.0;
       coreMeshRef.current.scale.lerp(
         new THREE.Vector3(targetScale, targetScale, targetScale),
-        delta * 6.0
+        delta * 5.0
       );
     }
   });
@@ -164,12 +158,12 @@ const SingleNode: React.FC<{
         <meshPhysicalMaterial
           color="#0f172a"
           emissive={isConceptActive ? nodeColor : "#1e293b"}
-          emissiveIntensity={isConceptActive ? 0.8 : 0.2}
-          roughness={0.2}
+          emissiveIntensity={isConceptActive ? 0.75 : 0.15}
+          roughness={0.25}
           metalness={0.9}
           transmission={0.4}
           transparent
-          opacity={0.85}
+          opacity={isConceptActive ? 0.9 : 0.65}
         />
       </mesh>
 
@@ -180,7 +174,7 @@ const SingleNode: React.FC<{
           color={isConceptActive ? nodeColor : "#334155"}
           wireframe
           transparent
-          opacity={isConceptActive ? 0.95 : 0.4}
+          opacity={isConceptActive ? 0.95 : 0.3}
         />
       </mesh>
 
@@ -190,23 +184,23 @@ const SingleNode: React.FC<{
         <meshStandardMaterial
           color={nodeColor}
           emissive={nodeColor}
-          emissiveIntensity={isConceptActive ? 1.6 : 0.8}
+          emissiveIntensity={isConceptActive ? 1.5 : 0.6}
           roughness={0.3}
           metalness={0.7}
         />
       </mesh>
 
-      {/* HTML Telemetry Tag on Hover */}
-      {isConceptActive && (
+      {/* HTML Telemetry Tag on Explicit Pointer Hover Focus */}
+      {(isHovered || internalHover) && (
         <Html
           position={[0, 0.75, 0]}
           center
           distanceFactor={10}
-          className="pointer-events-none transition-all duration-200"
+          className="pointer-events-none transition-all duration-200 select-none"
         >
-          <div className="bg-surface/95 backdrop-blur-md border border-border px-2.5 py-1.5 rounded-lg shadow-xl shadow-black/50 text-white font-mono text-[10px] whitespace-nowrap space-y-0.5">
+          <div className="bg-surface/95 backdrop-blur-md border border-border px-2.5 py-1.5 rounded-lg shadow-xl shadow-black/60 text-white font-mono text-[10px] whitespace-nowrap space-y-0.5">
             <div className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               <span className="font-bold">{node.symbol}</span>
               <span className="text-muted text-[9px]">({node.status})</span>
             </div>

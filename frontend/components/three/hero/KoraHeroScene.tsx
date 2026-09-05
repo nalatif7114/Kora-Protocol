@@ -13,6 +13,8 @@ interface KoraHeroSceneProps {
   activeConcept: ProtocolConcept;
   hoveredNodeId: string | null;
   onHoverNode: (nodeId: string | null) => void;
+  storyProgress?: number;
+  isScrolling?: boolean;
   reducedMotion?: boolean;
 }
 
@@ -20,12 +22,18 @@ export const KoraHeroScene: React.FC<KoraHeroSceneProps> = ({
   activeConcept,
   hoveredNodeId,
   onHoverNode,
+  storyProgress = 0,
+  isScrolling = false,
   reducedMotion = false,
 }) => {
   return (
     <>
-      {/* 1. Camera Parallax & Responsive Rig */}
-      <HeroCamera reducedMotion={reducedMotion} />
+      {/* 1. Deterministic Storytelling Camera Rig */}
+      <HeroCamera
+        storyProgress={storyProgress}
+        isScrolling={isScrolling}
+        reducedMotion={reducedMotion}
+      />
 
       {/* 2. Restrained Institutional Lighting */}
       <ambientLight intensity={0.65} />
@@ -41,22 +49,41 @@ export const KoraHeroScene: React.FC<KoraHeroSceneProps> = ({
       />
       <pointLight
         position={[0, 0, 0]}
-        intensity={activeConcept === "liquidity" ? 2.2 : 1.4}
+        intensity={
+          activeConcept === "liquidity"
+            ? 2.0
+            : activeConcept === "interest"
+            ? 1.8
+            : 1.2
+        }
         color={activeConcept === "liquidity" ? "#10b981" : "#0284c7"}
         distance={6}
       />
 
       {/* 3. Primary 3D Protocol Infrastructure Nodes */}
       <group position={[0, 0, 0]}>
-        <LiquidityCore activeConcept={activeConcept} reducedMotion={reducedMotion} />
+        <LiquidityCore
+          activeConcept={activeConcept}
+          storyProgress={storyProgress}
+          reducedMotion={reducedMotion}
+        />
         <ProtocolNodes
           activeConcept={activeConcept}
           hoveredNodeId={hoveredNodeId}
           onHoverNode={onHoverNode}
+          storyProgress={storyProgress}
           reducedMotion={reducedMotion}
         />
-        <CapitalFlow activeConcept={activeConcept} reducedMotion={reducedMotion} />
-        <RiskPerimeter activeConcept={activeConcept} reducedMotion={reducedMotion} />
+        <CapitalFlow
+          activeConcept={activeConcept}
+          storyProgress={storyProgress}
+          reducedMotion={reducedMotion}
+        />
+        <RiskPerimeter
+          activeConcept={activeConcept}
+          storyProgress={storyProgress}
+          reducedMotion={reducedMotion}
+        />
       </group>
 
       {/* 4. Restrained Post-Processing (Crisp geometry, subtle bloom) */}
@@ -65,7 +92,7 @@ export const KoraHeroScene: React.FC<KoraHeroSceneProps> = ({
           <Bloom
             luminanceThreshold={0.88}
             luminanceSmoothing={0.2}
-            intensity={0.4}
+            intensity={0.35}
             radius={0.3}
           />
           <Vignette

@@ -2,35 +2,43 @@
 
 import React from "react";
 import { ProtocolConcept } from "../../landing/types";
-import { Shield, ArrowRightLeft, Database, Activity, Lock, Cpu } from "lucide-react";
+import { Shield, ArrowRightLeft, Database, Activity, Lock, CheckCircle2 } from "lucide-react";
 
 interface HeroSceneFallbackProps {
   activeConcept: ProtocolConcept;
-  onHoverConcept: (concept: ProtocolConcept) => void;
+  onHoverConcept?: (concept: ProtocolConcept) => void;
+  className?: string;
 }
 
 export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
   activeConcept,
-  onHoverConcept,
+  onHoverConcept = () => {},
+  className = "",
 }) => {
+  const isLiquidity = activeConcept === "liquidity";
+  const isCollateral = activeConcept === "collateral";
+  const isBorrow = activeConcept === "borrow";
+  const isInterest = activeConcept === "interest";
+  const isRisk = activeConcept === "risk" || activeConcept === "security";
+
   return (
     <div
       role="img"
-      aria-label="Kora Institutional Lending Infrastructure Diagram"
-      className="relative w-full h-[420px] sm:h-[500px] lg:h-[560px] rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden"
+      aria-label="Kora Institutional Lending Infrastructure Technical Blueprint"
+      className={`relative w-full h-full min-h-[440px] sm:min-h-[520px] lg:min-h-[600px] rounded-2xl border border-border bg-card/70 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden ${className}`}
     >
       {/* Background Architectural Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b20_1px,transparent_1px),linear-gradient(to_bottom,#1e293b20_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
       {/* Top Telemetry Header */}
       <div className="relative z-10 flex items-center justify-between border-b border-border/80 pb-3 font-mono text-[11px]">
         <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white font-semibold tracking-wider">PROTOCOL ENGINE</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="text-white font-semibold tracking-wider">PROTOCOL ENGINE BLUEPRINT</span>
           <span className="text-muted">/ 1e27 RAY PRECISION</span>
         </div>
-        <div className="text-muted hidden sm:block">
-          EVM PARIS COMPATIBLE
+        <div className="text-slate-400 hidden sm:block">
+          {activeConcept ? `ACTIVE: ${activeConcept.toUpperCase()}` : "EVM PARIS COMPATIBLE"}
         </div>
       </div>
 
@@ -51,8 +59,8 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
               onMouseEnter={() => onHoverConcept("liquidity")}
               onMouseLeave={() => onHoverConcept(null)}
               className={`p-2.5 rounded-lg border transition-all cursor-pointer font-mono ${
-                activeConcept === "liquidity"
-                  ? "bg-emerald-500/15 border-emerald-500/50 shadow-sm shadow-emerald-500/20"
+                isLiquidity
+                  ? "bg-emerald-500/15 border-emerald-500/60 shadow-sm shadow-emerald-500/20"
                   : "bg-surface/80 border-border hover:border-slate-600"
               }`}
             >
@@ -70,17 +78,23 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
           <div
             onMouseEnter={() => onHoverConcept("liquidity")}
             onMouseLeave={() => onHoverConcept(null)}
-            className={`w-28 h-28 sm:w-36 sm:h-36 rounded-2xl border flex flex-col items-center justify-center p-3 text-center transition-all cursor-pointer ${
-              activeConcept === "liquidity" || activeConcept === "borrow"
+            className={`w-32 h-32 sm:w-40 sm:h-40 rounded-2xl border flex flex-col items-center justify-center p-3 text-center transition-all cursor-pointer ${
+              isLiquidity || isInterest || isBorrow
                 ? "bg-accent/15 border-accent shadow-lg shadow-accent/20 scale-105"
                 : "bg-surface border-border"
             }`}
           >
             <Database className="w-6 h-6 text-accent mb-1.5" />
             <div className="font-bold text-white text-xs font-mono">RESERVE CORE</div>
-            <div className="text-[10px] text-muted font-mono mt-0.5">$18.7M Cash</div>
-            <div className="text-[9px] text-accent font-mono mt-1 px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20">
-              O(1) Accrual
+            <div className="text-[10px] text-slate-300 font-mono mt-0.5">$18.7M Cash</div>
+            <div
+              className={`text-[9px] font-mono mt-1 px-1.5 py-0.5 rounded border transition-colors ${
+                isInterest
+                  ? "bg-accent/30 border-accent text-white font-bold"
+                  : "bg-accent/10 border-accent/20 text-accent"
+              }`}
+            >
+              {isInterest ? "1e27 Ray Compounding" : "O(1) Scaled Shares"}
             </div>
           </div>
         </div>
@@ -96,8 +110,8 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
             onMouseEnter={() => onHoverConcept("collateral")}
             onMouseLeave={() => onHoverConcept(null)}
             className={`p-2.5 rounded-lg border transition-all cursor-pointer font-mono ${
-              activeConcept === "collateral"
-                ? "bg-cyan-500/15 border-cyan-500/50 shadow-sm shadow-cyan-500/20"
+              isCollateral
+                ? "bg-cyan-500/15 border-cyan-500/60 shadow-sm shadow-cyan-500/20"
                 : "bg-surface/80 border-border hover:border-slate-600"
             }`}
           >
@@ -107,7 +121,7 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
             </div>
             <div className="text-[10px] text-muted mt-1 flex justify-between">
               <span>Max LTV:</span>
-              <span className="text-slate-200">80.0%</span>
+              <span className="text-slate-200">75.0%</span>
             </div>
           </div>
 
@@ -116,7 +130,7 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
             onMouseEnter={() => onHoverConcept("borrow")}
             onMouseLeave={() => onHoverConcept(null)}
             className={`p-2.5 rounded-lg border transition-all cursor-pointer font-mono ${
-              activeConcept === "borrow"
+              isBorrow
                 ? "bg-accent/20 border-accent shadow-sm shadow-accent/30"
                 : "bg-surface/80 border-border hover:border-slate-600"
             }`}
@@ -136,7 +150,7 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
             onMouseEnter={() => onHoverConcept("risk")}
             onMouseLeave={() => onHoverConcept(null)}
             className={`p-2.5 rounded-lg border transition-all cursor-pointer font-mono ${
-              activeConcept === "risk"
+              isRisk
                 ? "bg-emerald-500/20 border-emerald-400 shadow-sm shadow-emerald-500/30"
                 : "bg-surface/80 border-border hover:border-slate-600"
             }`}
@@ -156,8 +170,12 @@ export const HeroSceneFallback: React.FC<HeroSceneFallbackProps> = ({
       {/* Bottom Technical Status Bar */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 border-t border-border/80 pt-3 text-[10px] font-mono text-muted">
         <div className="flex items-center space-x-4">
-          <span className="text-slate-300">UTILIZATION: <b className="text-white">67.2%</b></span>
-          <span className="text-slate-300">ROUNDING: <b className="text-emerald-400">FLOOR/CEIL</b></span>
+          <span className="text-slate-300">
+            UTILIZATION: <b className="text-white">67.2%</b>
+          </span>
+          <span className="text-slate-300">
+            ROUNDING: <b className="text-emerald-400">FLOOR/CEIL</b>
+          </span>
         </div>
         <div className="flex items-center space-x-1.5 text-accent">
           <Activity className="w-3 h-3" />

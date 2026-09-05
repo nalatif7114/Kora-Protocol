@@ -7,11 +7,13 @@ import { ProtocolConcept } from "../../landing/types";
 
 interface LiquidityCoreProps {
   activeConcept: ProtocolConcept;
+  storyProgress?: number;
   reducedMotion?: boolean;
 }
 
 export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
   activeConcept,
+  storyProgress = 0,
   reducedMotion = false,
 }) => {
   const outerGroupRef = useRef<THREE.Group>(null);
@@ -22,42 +24,44 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
   useFrame((state, delta) => {
     if (reducedMotion) return;
 
-    const time = state.clock.getElapsedTime();
+    // 1. Calm, dignified idle movement + scroll-driven scrubbing
+    // Instead of high-speed infinite spinning, the rotation is tied smoothly to narrative scroll progress
+    const scrollAngle = storyProgress * Math.PI * 0.85;
+    const timeDrift = state.clock.getElapsedTime() * 0.02; // Very gentle ambient drift (0.02 rad/s)
 
-    // 1. Slow, subtle rotation of structural prism
     if (outerGroupRef.current) {
-      outerGroupRef.current.rotation.y = time * 0.15;
-      outerGroupRef.current.rotation.x = Math.sin(time * 0.1) * 0.08;
+      outerGroupRef.current.rotation.y = scrollAngle + timeDrift;
+      outerGroupRef.current.rotation.x = Math.sin(scrollAngle * 0.5) * 0.06;
     }
 
-    // 2. Subtle Ray index rings counter-rotation
+    // 2. Ray rings rotate calmly in response to scroll scrubbing
     if (rayRing1Ref.current) {
-      rayRing1Ref.current.rotation.z = -time * 0.12;
+      rayRing1Ref.current.rotation.z = -scrollAngle * 0.7 - timeDrift * 0.5;
     }
     if (rayRing2Ref.current) {
-      rayRing2Ref.current.rotation.x = time * 0.1;
-      rayRing2Ref.current.rotation.y = time * 0.08;
+      rayRing2Ref.current.rotation.x = scrollAngle * 0.5;
+      rayRing2Ref.current.rotation.y = scrollAngle * 0.6;
     }
 
-    // 3. Organic breathing pulse of inner liquidity cash core
+    // 3. Calm, purposeful scale adaptation
     if (innerCoreRef.current) {
-      const isLiquidityActive = activeConcept === "liquidity";
-      const isBorrowActive = activeConcept === "borrow";
+      const isLiquidity = activeConcept === "liquidity";
+      const isInterest = activeConcept === "interest";
+      const isBorrow = activeConcept === "borrow";
 
-      const baseScale = isLiquidityActive ? 1.12 : isBorrowActive ? 1.05 : 1.0;
-      const pulse = Math.sin(time * 2.0) * 0.04;
-      const targetScale = baseScale + pulse;
+      const targetScale = isLiquidity ? 1.14 : isInterest ? 1.08 : isBorrow ? 1.04 : 1.0;
 
       innerCoreRef.current.scale.lerp(
         new THREE.Vector3(targetScale, targetScale, targetScale),
-        delta * 4.0
+        delta * 3.5
       );
     }
   });
 
   const isLiquidityActive = activeConcept === "liquidity";
+  const isInterestActive = activeConcept === "interest";
   const isBorrowActive = activeConcept === "borrow";
-  const isRiskActive = activeConcept === "risk";
+  const isRiskActive = activeConcept === "risk" || activeConcept === "security";
 
   return (
     <group position={[0, 0, 0]}>
@@ -67,15 +71,15 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
         <mesh>
           <octahedronGeometry args={[1.3, 0]} />
           <meshPhysicalMaterial
-            color={isLiquidityActive ? "#0ea5e9" : isBorrowActive ? "#38bdf8" : "#1e293b"}
-            emissive={isLiquidityActive ? "#0284c7" : "#0f172a"}
-            emissiveIntensity={isLiquidityActive ? 0.6 : 0.2}
-            roughness={0.15}
+            color={isLiquidityActive ? "#0ea5e9" : isInterestActive ? "#38bdf8" : "#1e293b"}
+            emissive={isLiquidityActive ? "#0284c7" : isInterestActive ? "#0369a1" : "#0f172a"}
+            emissiveIntensity={isLiquidityActive ? 0.7 : isInterestActive ? 0.5 : 0.2}
+            roughness={0.2}
             metalness={0.8}
-            transmission={0.65}
+            transmission={0.6}
             thickness={0.8}
             transparent
-            opacity={0.75}
+            opacity={0.8}
             wireframe={false}
           />
         </mesh>
@@ -84,10 +88,10 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
         <mesh>
           <octahedronGeometry args={[1.305, 0]} />
           <meshBasicMaterial
-            color={isLiquidityActive ? "#38bdf8" : isBorrowActive ? "#818cf8" : "#475569"}
+            color={isLiquidityActive ? "#38bdf8" : isInterestActive ? "#7dd3fc" : "#475569"}
             wireframe
             transparent
-            opacity={isLiquidityActive ? 0.9 : 0.45}
+            opacity={isLiquidityActive || isInterestActive ? 0.9 : 0.4}
           />
         </mesh>
 
@@ -96,21 +100,21 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
           <sphereGeometry args={[0.75, 32, 32]} />
           <meshStandardMaterial
             color={isLiquidityActive ? "#0284c7" : isBorrowActive ? "#0ea5e9" : "#0369a1"}
-            emissive={isLiquidityActive ? "#38bdf8" : "#0ea5e9"}
-            emissiveIntensity={isLiquidityActive ? 1.2 : 0.6}
-            roughness={0.2}
+            emissive={isLiquidityActive ? "#38bdf8" : isInterestActive ? "#38bdf8" : "#0ea5e9"}
+            emissiveIntensity={isLiquidityActive ? 1.2 : isInterestActive ? 1.0 : 0.5}
+            roughness={0.25}
             metalness={0.5}
           />
         </mesh>
       </group>
 
-      {/* 2. Secondary Ray Index Precision Scale Ring (1e27 Accounting Telemetry) */}
+      {/* 2. Secondary Ray Index Precision Scale Rings (1e27 Accounting Telemetry) */}
       <mesh ref={rayRing1Ref} rotation={[Math.PI / 2.5, 0, 0]}>
         <ringGeometry args={[1.7, 1.72, 64]} />
         <meshBasicMaterial
-          color={isBorrowActive ? "#38bdf8" : "#334155"}
+          color={isInterestActive ? "#38bdf8" : isBorrowActive ? "#0ea5e9" : "#334155"}
           transparent
-          opacity={isBorrowActive ? 0.8 : 0.35}
+          opacity={isInterestActive ? 0.9 : isBorrowActive ? 0.6 : 0.3}
           side={THREE.DoubleSide}
         />
       </mesh>
@@ -118,9 +122,9 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
       <mesh ref={rayRing2Ref} rotation={[0, Math.PI / 3, 0]}>
         <ringGeometry args={[2.0, 2.02, 64]} />
         <meshBasicMaterial
-          color={isRiskActive ? "#10b981" : "#1e293b"}
+          color={isRiskActive ? "#10b981" : isInterestActive ? "#0ea5e9" : "#1e293b"}
           transparent
-          opacity={isRiskActive ? 0.75 : 0.25}
+          opacity={isRiskActive ? 0.8 : isInterestActive ? 0.5 : 0.25}
           side={THREE.DoubleSide}
         />
       </mesh>
@@ -131,7 +135,7 @@ export const LiquidityCore: React.FC<LiquidityCoreProps> = ({
         <meshBasicMaterial
           color="#0f172a"
           transparent
-          opacity={0.4}
+          opacity={0.35}
           side={THREE.DoubleSide}
         />
       </mesh>

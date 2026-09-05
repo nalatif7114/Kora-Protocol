@@ -1,18 +1,26 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import Lenis from "lenis";
+
+interface ScrollToOptions {
+  offset?: number;
+  duration?: number;
+  immediate?: boolean;
+}
 
 interface SmoothScrollContextType {
   lenis: Lenis | null;
   scrollProgress: number;
   isReducedMotion: boolean;
+  scrollTo: (target: number | string | HTMLElement, options?: ScrollToOptions) => void;
 }
 
 const SmoothScrollContext = createContext<SmoothScrollContextType>({
   lenis: null,
   scrollProgress: 0,
   isReducedMotion: false,
+  scrollTo: () => {},
 });
 
 export const useSmoothScroll = () => useContext(SmoothScrollContext);
@@ -71,12 +79,35 @@ export const SmoothScrollProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   }, []);
 
+  const scrollTo = useCallback(
+    (target: number | string | HTMLElement, options?: ScrollToOptions) => {
+      if (lenisInstance) {
+        lenisInstance.scrollTo(target, {
+          offset: options?.offset ?? 0,
+          duration: options?.duration ?? 1.2,
+          immediate: options?.immediate ?? isReducedMotion,
+        });
+      } else if (typeof window !== "undefined") {
+        if (typeof target === "number") {
+          window.scrollTo({ top: target, behavior: isReducedMotion ? "auto" : "smooth" });
+        } else if (typeof target === "string") {
+          const el = document.querySelector(target);
+          if (el) el.scrollIntoView({ behavior: isReducedMotion ? "auto" : "smooth" });
+        } else if (target instanceof HTMLElement) {
+          target.scrollIntoView({ behavior: isReducedMotion ? "auto" : "smooth" });
+        }
+      }
+    },
+    [lenisInstance, isReducedMotion]
+  );
+
   return (
     <SmoothScrollContext.Provider
       value={{
         lenis: lenisInstance,
         scrollProgress,
         isReducedMotion,
+        scrollTo,
       }}
     >
       {children}
